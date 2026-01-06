@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
-from scipy.special import expit
 
+#from scipy.special import expit # instead of defining our own sigmoid function which yields a warning
+
+def expit(x):
+    return 1 / (1 + np.exp(-x))
 
 HAND_CONNECTIONS = [
     (0, 1), (1, 2), (2, 3), (3, 4),
