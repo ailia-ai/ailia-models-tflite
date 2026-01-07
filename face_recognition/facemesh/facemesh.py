@@ -5,7 +5,9 @@ from logging import getLogger   # noqa: E402
 
 import cv2
 import numpy as np
-from scipy.special import expit
+
+#from scipy.special import expit# instead of defining our own sigmoid function which yields a warning
+from facemesh_utils import expit
 
 
 def find_and_append_util_path():

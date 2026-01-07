@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-from PIL import Image
 
 
 def get_palette(n):
@@ -82,14 +81,18 @@ def gen_preds_img_np(preds, height, width):
 
 def gen_preds_img(preds, height, width):
     palette = get_palette(256)
-    preds = np.asarray(np.argmax(preds, axis=1), dtype=np.uint8)
-    # for now, we only expects one image per batch
-    pred = convert_label(preds[0], inverse=True)
-    gen_img = Image.fromarray(pred)
-    gen_img.putpalette(palette)
-    return gen_img.resize((width, height))
+    palette = np.array(palette, dtype=np.uint8).reshape(-1, 3)
+    preds = np.argmax(preds, axis=1).astype(np.int32)
+    pred = convert_label(preds[0], inverse=True).astype(np.int32)
+    h, w = pred.shape
+    gen_img = np.zeros((h, w, 3), dtype=np.uint8)
+    for i in range(3):
+        gen_img[:, :, i] = palette[np.clip(pred, 0, 255), 2 - i]
+    gen_img = cv2.resize(gen_img, (width, height), interpolation=cv2.INTER_NEAREST)
+    return gen_img
+
 
 
 def save_pred(preds, sv_fname, height, width):
     save_img = gen_preds_img(preds, height, width)
-    save_img.save(sv_fname)
+    cv2.imwrite(sv_fname, save_img)
