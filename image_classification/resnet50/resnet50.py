@@ -99,8 +99,8 @@ def recognize_from_image():
     if args.tflite:
         interpreter = tf.lite.Interpreter(model_path=MODEL_PATH)
     else:
-        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None:
-            interpreter = ailia_tflite.Interpreter(model_path=MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
+            interpreter = ailia_tflite.Interpreter(model_path=MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path), num_threads = args.num_threads)
         else:
             interpreter = ailia_tflite.Interpreter(model_path=MODEL_PATH)
     if args.profile:

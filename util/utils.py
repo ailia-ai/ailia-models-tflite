@@ -143,12 +143,12 @@ def get_base_parser(
     )
     parser.add_argument(
         '-tp', '--thread_pool_num_threads', metavar='THREAD_POOL_NUM_THREADS',
-        type=int, default=None,
+        type=int, default=0,
         help='Set the number of threads for the thread pool. Defaults to the number of CPU cores.'
     )
     parser.add_argument(
         '-t', '--num_threads', metavar='NUM_THREADS',
-        type=int, default=None,
+        type=int, default=0,
         help='Set the number of threads for an instance. Defaults to the number of CPU cores.'
     )
     return parser
@@ -220,7 +220,7 @@ def update_parser(parser, check_input_type=True):
     # -------------------------------------------------------------------------
     # 2. Aply num threads
 
-    if args.thread_pool_num_threads is not None:
+    if args.thread_pool_num_threads is not 0:
         ailia_tflite.thread_pool_set_num_threads(args.thread_pool_num_threads)
 
     # -------------------------------------------------------------------------
