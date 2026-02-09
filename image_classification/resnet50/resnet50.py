@@ -61,7 +61,7 @@ parser.add_argument(
     help='Use legacy model. The default model was re-calibrated by 50000 images. If you specify legacy option, we use only 4 images for calibaraion.'
 )
 parser.add_argument(
-    '--tta', '-t', metavar='TTA',
+    '--tta', metavar='TTA',
     default='none', choices=TTA_NAMES,
     help=('tta scheme: ' + ' | '.join(TTA_NAMES) +
           ' (default: none)')
