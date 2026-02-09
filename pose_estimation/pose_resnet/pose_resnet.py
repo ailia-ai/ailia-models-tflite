@@ -471,7 +471,7 @@ def main():
     if args.tflite:
         interpreter_pose = tf.lite.Interpreter(model_path=POSE_MODEL_PATH)
     else:
-        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None:
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
             interpreter_pose = ailia_tflite.Interpreter(model_path=POSE_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
         else:
             interpreter_pose = ailia_tflite.Interpreter(model_path=POSE_MODEL_PATH)
@@ -481,7 +481,7 @@ def main():
     if args.tflite:
         interpreter_detect = tf.lite.Interpreter(model_path=DETECT_MODEL_PATH)
     else:
-        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None:
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
             interpreter_detect = ailia_tflite.Interpreter(model_path=DETECT_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
         else:
             interpreter_detect = ailia_tflite.Interpreter(model_path=DETECT_MODEL_PATH)

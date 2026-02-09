@@ -400,7 +400,7 @@ def main():
     if args.tflite:
         interpreter_emo = tf.lite.Interpreter(model_path=EMOTION_MODEL_PATH)
     else:
-        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None:
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
             interpreter_emo = ailia_tflite.Interpreter(model_path=EMOTION_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
         else:
             interpreter_emo = ailia_tflite.Interpreter(model_path=EMOTION_MODEL_PATH)
@@ -412,7 +412,7 @@ def main():
     if args.tflite:
         interpreter_gen = tf.lite.Interpreter(model_path=GENDER_MODEL_PATH)
     else:
-        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None:
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
             interpreter_gen = ailia_tflite.Interpreter(model_path=GENDER_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
         else:
             interpreter_gen = ailia_tflite.Interpreter(model_path=GENDER_MODEL_PATH)

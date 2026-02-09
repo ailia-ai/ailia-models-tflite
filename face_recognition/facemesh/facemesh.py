@@ -142,9 +142,9 @@ def recognize_from_image():
         detector = tf.lite.Interpreter(model_path=DETECTOR_MODEL_PATH)
         estimator = tf.lite.Interpreter(model_path=LANDMARK_MODEL_PATH)
     else:
-        if args.memory_mode or args.flags or args.env_id or args.delegate_path is not None:
-            detector = ailia_tflite.Interpreter(model_path=DETECTOR_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
-            estimator = ailia_tflite.Interpreter(model_path=LANDMARK_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path))
+        if args.flags or args.memory_mode or args.env_id or args.delegate_path is not None or args.num_threads != 0:
+            detector = ailia_tflite.Interpreter(model_path=DETECTOR_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path), num_threads = args.num_threads)
+            estimator = ailia_tflite.Interpreter(model_path=LANDMARK_MODEL_PATH, memory_mode = args.memory_mode, flags = args.flags, env_id = args.env_id, experimental_delegates = delegate_obj(args.delegate_path), num_threads = args.num_threads)
         else:
             detector = ailia_tflite.Interpreter(model_path=DETECTOR_MODEL_PATH)
             estimator = ailia_tflite.Interpreter(model_path=LANDMARK_MODEL_PATH)
