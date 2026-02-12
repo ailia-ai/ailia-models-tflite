@@ -212,7 +212,7 @@ def recognize_from_video(interpreter):
         logger.warning(
             'currently, video results cannot be output correctly...'
         )
-        writer = get_writer(args.savepath, save_h, save_w * 2)
+        writer = get_writer(args.savepath, save_h, save_w)
     else:
         writer = None
 
@@ -258,9 +258,13 @@ def recognize_from_video(interpreter):
 
         res_img, scale, padding = resize_image(res_img, (save_h, save_w), keep_aspect_ratio=False)
 
-        output_frame[:,save_w:save_w*2,:]=res_img
-        output_frame[:,0:save_w,:]=frame_mini
-        output_frame = output_frame.astype("uint8")
+        # grid view
+        #output_frame[:,save_w:save_w*2,:]=res_img
+        #output_frame[:,0:save_w,:]=frame_mini
+        #output_frame = output_frame.astype("uint8")
+
+        # single view
+        output_frame = res_img
 
         if not args.no_gui:
             cv2.imshow('depth', output_frame)
