@@ -334,10 +334,10 @@ def recognize_from_video():
 
         visual_img = frame
         frame = draw_bbox(frame, boxes, scores, classes)
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(visual_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(visual_img, fps)
             cv2.imshow('frame', visual_img)
 
         # save results

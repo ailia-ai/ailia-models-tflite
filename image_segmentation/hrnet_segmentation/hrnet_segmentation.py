@@ -218,10 +218,10 @@ def recognize_from_video():
         preds_tf_lite = smooth_output(preds_tf_lite, IMAGE_HEIGHT, IMAGE_WIDTH)
         preds_tf_lite = gen_preds_img_np(preds_tf_lite, IMAGE_HEIGHT, IMAGE_WIDTH)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(preds_tf_lite, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(preds_tf_lite, fps)
             cv2.imshow("Inference result", preds_tf_lite)
 
         # save results

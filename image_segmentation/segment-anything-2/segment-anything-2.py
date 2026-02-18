@@ -369,10 +369,10 @@ def recognize_from_video(image_encoder, prompt_encoder, mask_decoder, memory_att
             frame = show_points(input_point.astype(np.int64), input_label.astype(np.int64), frame)
             frame = show_box(input_box, frame)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(frame, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(frame, fps)
             cv2.imshow('frame', frame)
         if frame_names is not None:
             cv2.imwrite(f'video_{frame_idx}.png', frame)

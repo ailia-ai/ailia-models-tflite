@@ -278,10 +278,10 @@ def recognize_from_video():
                 frame, final_boxes, final_scores, final_cls_inds,
                 COCO_CATEGORY, normalized_boxes=False, logger=logger)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(visual_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(visual_img, fps)
             cv2.imshow('frame', visual_img)
 
         # save results

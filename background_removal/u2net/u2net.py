@@ -160,11 +160,11 @@ def recognize_from_video(interpreter):
         frame[:, :, 1] = frame[:, :, 1] * pred + 177 * (1 - pred)
         frame[:, :, 2] = frame[:, :, 2] * pred
 
+        disp = frame.astype(np.uint8)
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(disp, fps)
         if not args.no_gui:
-            disp = frame.astype(np.uint8)
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(disp, fps)
             cv2.imshow('frame', disp)
             frame_shown = True
 

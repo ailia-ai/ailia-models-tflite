@@ -167,10 +167,10 @@ def recognize_from_video(interpreter):
         plot_results(
             frame, preds_tf_lite, vgg16_labels.imagenet_category
         )
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(frame, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(frame, fps)
             cv2.imshow('frame', frame)
             frame_shown = True
         time.sleep(SLEEP_TIME)

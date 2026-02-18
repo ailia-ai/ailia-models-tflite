@@ -239,10 +239,10 @@ def recognize_from_video():
         #bilinear_img = cv2.resize(frame, (out_img_y.shape[1], out_img_y.shape[0]))
         #out_img[:, 0:out_img.shape[1]//2, :] = bilinear_img[:, 0:out_img.shape[1]//2, :]
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(out_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(out_img, fps)
             cv2.imshow('frame', out_img)
             frame_shown = True
         # save results
