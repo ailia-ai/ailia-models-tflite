@@ -247,7 +247,7 @@ def recognize_from_video(interpreter_emo, interpreter_gen, interpreter_det):
     while(True):
         ret, frame = capture.read()
 
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break

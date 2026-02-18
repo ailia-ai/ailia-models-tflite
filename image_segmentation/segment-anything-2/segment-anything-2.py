@@ -343,7 +343,7 @@ def recognize_from_video(image_encoder, prompt_encoder, mask_decoder, memory_att
             video_height = frame.shape[0]
             video_width = frame.shape[1]
 
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break

@@ -261,7 +261,7 @@ def recognize_from_video(detector, estimator):
 
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_data, scale, pad = preprocess_image(
