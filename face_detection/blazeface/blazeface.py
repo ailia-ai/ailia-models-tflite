@@ -21,7 +21,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj  # noqa: E402
 from model_utils import check_and_download_models  # noqa: E402
-from image_utils import load_image  # noqa: E402
+from image_utils import load_image, draw_fps, calc_fps  # noqa: E402
 import webcamera_utils  # noqa: E402
 import blazeface_utils as but
 
@@ -159,16 +159,15 @@ def recognize_from_video():
     if args.savepath != SAVE_IMAGE_PATH:
         f_h = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         f_w = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        save_h, save_w = webcamera_utils.calc_adjust_fsize(
-            f_h, f_w, IMAGE_HEIGHT, IMAGE_WIDTH
-        )
-        writer = webcamera_utils.get_writer(args.savepath, save_h, save_w)
+        # Write out original frame size so results overlay on raw frames
+        writer = webcamera_utils.get_writer(args.savepath, f_h, f_w)
     else:
         writer = None
 
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_image, input_data = webcamera_utils.preprocess_frame(
@@ -188,12 +187,18 @@ def recognize_from_video():
 
         # postprocessing
         detections = but.postprocess(preds_tf_lite, file_abs_path(__file__, "anchors.npy"))
-        but.show_result(input_image, detections)
-        cv2.imshow('frame', input_image)
+        # Draw on the original frame by undoing preprocess padding
+        but.show_result(input_image, detections, frame=frame, model_input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT))
+        # FPS overlay
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(frame, fps)
+        if not args.no_gui:
+            cv2.imshow('frame', frame)
 
         # save results
         if writer is not None:
-            writer.write(input_image)
+            writer.write(frame)
 
     capture.release()
     cv2.destroyAllWindows()

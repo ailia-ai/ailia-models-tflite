@@ -22,7 +22,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj  # noqa: E402
 from model_utils import check_and_download_models  # noqa: E402
-from image_utils import load_image as load_image_img, preprocess_image  # noqa: E402
+from image_utils import load_image as load_image_img, preprocess_image, draw_fps, calc_fps  # noqa: E402
 from detector_utils import load_image as load_image_det  # noqa: E402
 from nms_utils import nms # noqa: E402
 import webcamera_utils  # noqa: E402
@@ -406,9 +406,10 @@ def recognize_from_video(interpreter_pose, interpreter_detect):
         writer = None
     
     frame_shown = False
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break
@@ -449,8 +450,12 @@ def recognize_from_video(interpreter_pose, interpreter_detect):
         # plot result
         res_img = plot_results(boxes, scores, classes, frame, COCO_CATEGORY, pose_detections)
 
-        cv2.imshow('frame', res_img)
-        frame_shown = True
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(res_img, fps)
+            cv2.imshow('frame', res_img)
+            frame_shown = True
         # save results
         if writer is not None:
             writer.write(res_img)

@@ -2,6 +2,7 @@ import sys
 import os
 
 import cv2
+import time
 import numpy as np
 
 
@@ -268,3 +269,49 @@ def draw_result_on_img(img, texts, w_ratio=0.35, h_ratio=0.2, alpha=0.4):
 
     draw_texts(mat_img, texts)
     return mat_img
+
+
+def draw_fps(img, fps, color=(0, 255, 0), font_scale=0.7, thickness=2):
+    """Draw current FPS on the bottom-left corner of the image.
+
+    Parameters
+    ----------
+    img : numpy array (H, W, C)
+        Target image (modified in-place).
+    fps : float
+        Frames per second value to render.
+    color : tuple
+        BGR color for text.
+    font_scale : float
+        Font scale for cv2.putText.
+    thickness : int
+        Thickness for cv2.putText.
+    """
+    h, w = img.shape[:2]
+    text = f"FPS: {fps:.1f}"
+    x = 8
+    y = h - 12
+    # Draw shadow for readability
+    cv2.putText(img, text, (x+1, y+1), cv2.FONT_HERSHEY_SIMPLEX, font_scale, (0, 0, 0), thickness+2, cv2.LINE_AA)
+    cv2.putText(img, text, (x, y), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
+
+
+def calc_fps(prev_time):
+    """Calculate FPS and return FPS with updated prev_time.
+
+    Parameters
+    ----------
+    prev_time : float
+        Previous timestamp (time.time()).
+
+    Returns
+    -------
+    fps : float
+        Frames per second.
+    now : float
+        Updated timestamp to reuse as prev_time.
+    """
+    now = time.time()
+    dt = max(now - prev_time, 1e-8)
+    fps = 1.0 / dt
+    return fps, now

@@ -24,6 +24,7 @@ find_and_append_util_path()
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj
 from model_utils import check_and_download_models, format_input_tensor, get_output_tensor
 from detector_utils import plot_results, write_predictions
+from image_utils import draw_fps, calc_fps
 import webcamera_utils
 from yolox_utils import preproc as preprocess
 from yolox_utils import postprocess, filter_predictions
@@ -255,9 +256,10 @@ def recognize_from_video():
     else:
         swap = (0, 1, 2)
 
+    prev_time = time.time()
     while (True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         img, ratio = preprocess(frame, (HEIGHT, WIDTH), swap=swap)
@@ -276,11 +278,15 @@ def recognize_from_video():
                 frame, final_boxes, final_scores, final_cls_inds,
                 COCO_CATEGORY, normalized_boxes=False, logger=logger)
 
-        cv2.imshow('frame', visual_img)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(visual_img, fps)
+            cv2.imshow('frame', visual_img)
 
         # save results
         if writer is not None:
-            writer.write(res_img)
+            writer.write(visual_img)
 
         # write prediction
         if args.write_prediction:

@@ -24,6 +24,7 @@ find_and_append_util_path()
 from utils import get_base_parser, update_parser, get_savepath  # noqa
 from model_utils import check_and_download_models  # noqa
 from webcamera_utils import get_capture, get_writer  # noqa
+from image_utils import draw_fps, calc_fps  # noqa
 
 logger = getLogger(__name__)
 
@@ -330,6 +331,7 @@ def recognize_from_video(image_encoder, prompt_encoder, mask_decoder, memory_att
     predictor.reset_state(inference_state)
 
     frame_shown = False
+    prev_time = time.time()
 
     frame_idx = 0
     while (True):
@@ -343,7 +345,7 @@ def recognize_from_video(image_encoder, prompt_encoder, mask_decoder, memory_att
             video_height = frame.shape[0]
             video_width = frame.shape[1]
 
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break
@@ -367,14 +369,18 @@ def recognize_from_video(image_encoder, prompt_encoder, mask_decoder, memory_att
             frame = show_points(input_point.astype(np.int64), input_label.astype(np.int64), frame)
             frame = show_box(input_box, frame)
 
-        cv2.imshow('frame', frame)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(frame, fps)
+            cv2.imshow('frame', frame)
         if frame_names is not None:
             cv2.imwrite(f'video_{frame_idx}.png', frame)
 
         if writer is not None:
             writer.write(frame)
+            frame_shown = True
 
-        frame_shown = True
         frame_idx = frame_idx + 1
 
     if writer is not None:

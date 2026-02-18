@@ -20,7 +20,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, delegate_obj  # noqa: E402
 from model_utils import check_and_download_models  # noqa: E402
-from image_utils import load_image  # noqa: E402
+from image_utils import load_image, draw_fps, calc_fps  # noqa: E402
 from detector_utils import plot_results  # noqa: E402
 import webcamera_utils  # noqa: E402
 import mobilenetv2ssdlite_utils as mut
@@ -142,9 +142,10 @@ def recognize_from_video():
     else:
         writer = None
 
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_image, input_data = webcamera_utils.preprocess_frame(
@@ -162,7 +163,11 @@ def recognize_from_video():
         # postprocessing
         mut.postprocessing(input_image, boxes, classes, scores)
 
-        cv2.imshow('frame', input_image)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(input_image, fps)
+            cv2.imshow('frame', input_image)
 
         # save results
         if writer is not None:

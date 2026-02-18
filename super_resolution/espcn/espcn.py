@@ -21,6 +21,7 @@ find_and_append_util_path()
 
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath  # noqa: E402
+from image_utils import draw_fps, calc_fps  # noqa: E402
 from model_utils import check_and_download_models  # noqa: E402
 import webcamera_utils  # noqa: E402
 
@@ -192,9 +193,10 @@ def recognize_from_video():
     output_details = interpreter.get_output_details()
 
     frame_shown = False
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break
@@ -237,11 +239,15 @@ def recognize_from_video():
         #bilinear_img = cv2.resize(frame, (out_img_y.shape[1], out_img_y.shape[0]))
         #out_img[:, 0:out_img.shape[1]//2, :] = bilinear_img[:, 0:out_img.shape[1]//2, :]
 
-        cv2.imshow('frame', out_img)
-        frame_shown = True
-        # # save results
-        # if writer is not None:
-        #     writer.write(output_img)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(out_img, fps)
+            cv2.imshow('frame', out_img)
+            frame_shown = True
+        # save results
+        if writer is not None:
+            writer.write(out_img)
 
     capture.release()
     cv2.destroyAllWindows()

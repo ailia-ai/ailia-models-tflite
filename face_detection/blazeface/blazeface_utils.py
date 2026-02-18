@@ -232,19 +232,83 @@ def crop_blazeface(obj, margin, frame):
     return crop_img, top_left, bottom_right
 
 
-def show_result(input_img, detections):
-    for detection in detections:
-        for d in detection:
-            w = input_img.shape[1]
-            h = input_img.shape[0]
-            top_left = (int(d[1]*w), int(d[0]*h))
-            bottom_right = (int(d[3]*w), int(d[2]*h))
-            color = (255, 255, 255)
-            cv2.rectangle(input_img, top_left, bottom_right, color, 4)
+def show_result(input_img, detections, frame=None, model_input_shape=None):
+    """
+    Draw detections.
 
-            for k in range(6):
-                kp_x = d[4 + k*2] * input_img.shape[1]
-                kp_y = d[4 + k*2 + 1] * input_img.shape[0]
-                r = int(input_img.shape[1]/100)
-                cv2.circle(input_img, (int(kp_x), int(kp_y)),
-                           r, (255, 255, 255), -1)
+    If `frame` and `model_input_shape` are provided, draw on the original
+    frame by undoing the padding applied in preprocess_frame. Otherwise,
+    draw on `input_img` directly (legacy behavior).
+    
+    Parameters
+    ----------
+    input_img : np.ndarray
+        Padded image returned as the first value from preprocess_frame.
+    detections : list[np.ndarray]
+        List of detections arrays (N x 17) with normalized coords.
+    frame : np.ndarray | None
+        Original frame before padding. If provided, results are drawn on it.
+    model_input_shape : tuple(int, int) | None
+        (input_width, input_height) of the model.
+    """
+    draw_img = frame if frame is not None else input_img
+
+    if frame is not None and model_input_shape is not None:
+        # Undo padding from preprocess_frame.adjust_frame_size
+        f_h, f_w = frame.shape[0], frame.shape[1]
+        img_h, img_w = input_img.shape[0], input_img.shape[1]
+        off_y = (img_h - f_h) // 2
+        off_x = (img_w - f_w) // 2
+        in_w, in_h = model_input_shape
+        # Scale from model input to padded image size
+        sx = img_w / float(in_w)
+        sy = img_h / float(in_h)
+
+        for detection in detections:
+            for d in detection:
+                # Box coordinates in model input pixels
+                xmin_m = d[1] * in_w
+                ymin_m = d[0] * in_h
+                xmax_m = d[3] * in_w
+                ymax_m = d[2] * in_h
+
+                # Map to padded image, then to original frame by removing offsets
+                xmin = int(xmin_m * sx - off_x)
+                ymin = int(ymin_m * sy - off_y)
+                xmax = int(xmax_m * sx - off_x)
+                ymax = int(ymax_m * sy - off_y)
+
+                # Clip to frame bounds
+                xmin = max(0, min(f_w - 1, xmin))
+                xmax = max(0, min(f_w - 1, xmax))
+                ymin = max(0, min(f_h - 1, ymin))
+                ymax = max(0, min(f_h - 1, ymax))
+
+                color = (255, 255, 255)
+                cv2.rectangle(draw_img, (xmin, ymin), (xmax, ymax), color, 4)
+
+                for k in range(6):
+                    kp_x_m = d[4 + k*2] * in_w
+                    kp_y_m = d[4 + k*2 + 1] * in_h
+                    kp_x = int(kp_x_m * sx - off_x)
+                    kp_y = int(kp_y_m * sy - off_y)
+                    if 0 <= kp_x < f_w and 0 <= kp_y < f_h:
+                        r = max(1, int(f_w / 100))
+                        cv2.circle(draw_img, (kp_x, kp_y), r, (255, 255, 255), -1)
+    else:
+        # Legacy behavior: draw on input_img directly (coords scaled to it)
+        for detection in detections:
+            for d in detection:
+                w = input_img.shape[1]
+                h = input_img.shape[0]
+                top_left = (int(d[1]*w), int(d[0]*h))
+                bottom_right = (int(d[3]*w), int(d[2]*h))
+                color = (255, 255, 255)
+                cv2.rectangle(draw_img, top_left, bottom_right, color, 4)
+
+                for k in range(6):
+                    kp_x = d[4 + k*2] * w
+                    kp_y = d[4 + k*2 + 1] * h
+                    r = max(1, int(w/100))
+                    cv2.circle(draw_img, (int(kp_x), int(kp_y)),
+                               r, (255, 255, 255), -1)

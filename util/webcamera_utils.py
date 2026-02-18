@@ -2,9 +2,11 @@ import sys
 
 import numpy as np
 import cv2
+import re
 
 from utils import check_file_existance
 from image_utils import normalize_image
+from tcp_utils import TcpVideoWriter, TcpVideoReader
 
 
 def calc_adjust_fsize(f_height, f_width, height, width):
@@ -122,6 +124,10 @@ def get_writer(savepath, height, width, fps=20, rgb=True):
     -------
     writer : cv2.VideoWriter()
     """
+    if re.match(r"^\d{1,3}(\.\d{1,3}){3}:\d+$", savepath):
+        writer = TcpVideoWriter(savepath, height, width, fps, rgb)
+        return writer
+
     writer = cv2.VideoWriter(
         savepath,
         # cv2.VideoWriter_fourcc(*'MJPG'),  # avi mode
@@ -149,6 +155,10 @@ def get_capture(video, width = 0, height = 0):
     -------
     capture : cv2.VideoCapture
     """
+    if re.match(r"^\d{1,3}(\.\d{1,3}){3}:\d+$", video):
+        capture = TcpVideoReader(video)
+        return capture
+
     try:
         video_id = int(video)
 

@@ -96,6 +96,14 @@ def get_base_parser(
         help='set profile mode (enable to show PROFILE logs)'
     )
     parser.add_argument(
+        '--no_gui', action='store_true',
+        help='Disable GUI display (skip cv2.imshow).'
+    )
+    parser.add_argument(
+        '--fps', action='store_true',
+        help='Display FPS on the shown video frames.'
+    )
+    parser.add_argument(
         '-bc', '--benchmark_count', metavar='BENCHMARK_COUNT',
         default=5, type=int,
         help='set iteration count of benchmark'

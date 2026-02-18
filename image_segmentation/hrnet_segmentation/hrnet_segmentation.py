@@ -22,7 +22,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj  # noqa: E402
 from model_utils import check_and_download_models, format_input_tensor  # noqa: E402
-from image_utils import load_image, preprocess_image  # noqa: E402
+from image_utils import load_image, preprocess_image, draw_fps, calc_fps  # noqa: E402
 import webcamera_utils  # noqa: E402
 from hrnet_utils import smooth_output, save_pred, gen_preds_img_np
 
@@ -190,10 +190,11 @@ def recognize_from_video():
     else:
         writer = None
 
+    prev_time = time.time()
     while True:
         ret, frame = capture.read()
 
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_data = preprocess_image(
@@ -217,7 +218,11 @@ def recognize_from_video():
         preds_tf_lite = smooth_output(preds_tf_lite, IMAGE_HEIGHT, IMAGE_WIDTH)
         preds_tf_lite = gen_preds_img_np(preds_tf_lite, IMAGE_HEIGHT, IMAGE_WIDTH)
 
-        cv2.imshow("Inference result", preds_tf_lite)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(preds_tf_lite, fps)
+            cv2.imshow("Inference result", preds_tf_lite)
 
         # save results
         if writer is not None:

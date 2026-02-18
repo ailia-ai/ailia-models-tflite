@@ -25,7 +25,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj  # noqa: E402
 from webcamera_utils import get_capture, get_writer  # noqa: E402
-from image_utils import load_image, preprocess_image  # noqa: E402
+from image_utils import load_image, preprocess_image, draw_fps, calc_fps  # noqa: E402
 from model_utils import check_and_download_models  # noqa: E402
 from facemesh_const import FACEMESH_TESSELATION
 import facemesh_utils as fut
@@ -270,9 +270,10 @@ def recognize_from_video():
     else:
         writer = None
 
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_data, scale, pad = preprocess_image(
@@ -333,7 +334,11 @@ def recognize_from_video():
         if args.video == '0': # Flip horizontally if camera
             visual_img = np.ascontiguousarray(frame[:,::-1,:])
 
-        cv2.imshow('frame', visual_img)
+        if not args.no_gui:
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(visual_img, fps)
+            cv2.imshow('frame', visual_img)
 
         # save results
         if writer is not None:

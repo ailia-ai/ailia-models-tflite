@@ -21,7 +21,7 @@ find_and_append_util_path()
 
 from utils import file_abs_path, get_base_parser, update_parser, get_savepath, delegate_obj  # noqa: E402
 from model_utils import check_and_download_models, format_input_tensor, get_output_tensor  # noqa: E402
-from image_utils import load_image  # noqa: E402
+from image_utils import load_image, draw_fps, calc_fps  # noqa: E402
 from classifier_utils import plot_results, print_results, write_predictions  # noqa: E402
 import webcamera_utils  # noqa: E402
 import mobilenetv1_labels
@@ -195,9 +195,10 @@ def recognize_from_video():
     if args.float:
         dtype = np.float32
 
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
 
         input_image, input_data = webcamera_utils.preprocess_frame(
@@ -215,14 +216,19 @@ def recognize_from_video():
         preds_tf_lite = interpreter.get_tensor(output_details[0]['index'])
 
         plot_results(
-            input_image, preds_tf_lite, mobilenetv1_labels.imagenet_category
+            frame, preds_tf_lite, mobilenetv1_labels.imagenet_category
         )
-        cv2.imshow('frame', input_image)
+        # FPS overlay
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(frame, fps)
+        if not args.no_gui:
+            cv2.imshow('frame', frame)
         time.sleep(SLEEP_TIME)
 
         # save results
         if writer is not None:
-            writer.write(input_image)
+            writer.write(frame)
 
     capture.release()
     cv2.destroyAllWindows()

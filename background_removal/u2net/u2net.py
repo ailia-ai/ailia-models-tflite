@@ -23,6 +23,7 @@ import webcamera_utils  # noqa: E402
 from model_utils import check_and_download_models, format_input_tensor  # noqa: E402
 from utils import file_abs_path, get_base_parser, update_parser, delegate_obj  # noqa: E402
 from u2net_utils import imread, load_image, norm, save_result, transform  # noqa: E402
+from image_utils import draw_fps, calc_fps  # noqa: E402
 
 
 logger = getLogger(__name__)
@@ -114,11 +115,16 @@ def recognize_from_video(interpreter):
     # create video writer if savepath is specified as video format
     f_h = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     f_w = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+    if args.savepath != SAVE_IMAGE_PATH:
+        writer = webcamera_utils.get_writer(args.savepath, f_h, f_w)
+    else:
+        writer = None
     
     frame_shown = False
+    prev_time = time.time()
     while(True):
         ret, frame = capture.read()
-        if (cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
+        if (args.no_gui == False and cv2.waitKey(1) & 0xFF == ord('q')) or not ret:
             break
         if frame_shown and cv2.getWindowProperty('frame', cv2.WND_PROP_VISIBLE) == 0:
             break
@@ -154,10 +160,21 @@ def recognize_from_video(interpreter):
         frame[:, :, 1] = frame[:, :, 1] * pred + 177 * (1 - pred)
         frame[:, :, 2] = frame[:, :, 2] * pred
 
-        cv2.imshow('frame', frame.astype(np.uint8))
-        frame_shown = True
+        if not args.no_gui:
+            disp = frame.astype(np.uint8)
+            fps, prev_time = calc_fps(prev_time)
+            if args.fps:
+                draw_fps(disp, fps)
+            cv2.imshow('frame', disp)
+            frame_shown = True
+
+        # save results
+        if writer is not None:
+            writer.write(frame.astype(np.uint8))
 
     capture.release()
+    if writer is not None:
+        writer.release()
     logger.info('Script finished successfully.')
 
 
