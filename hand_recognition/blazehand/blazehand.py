@@ -355,10 +355,10 @@ def recognize_from_video(detector, estimator):
             visual_img = np.ascontiguousarray(frame[:,::-1,:])
 
         cv2.putText(visual_img, text, (8, 24), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(visual_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(visual_img, fps)
             cv2.imshow('frame', visual_img)
 
         # save results

@@ -334,10 +334,10 @@ def recognize_from_video():
         if args.video == '0': # Flip horizontally if camera
             visual_img = np.ascontiguousarray(frame[:,::-1,:])
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(visual_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(visual_img, fps)
             cv2.imshow('frame', visual_img)
 
         # save results

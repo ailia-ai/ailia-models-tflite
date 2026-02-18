@@ -450,10 +450,10 @@ def recognize_from_video(interpreter_pose, interpreter_detect):
         # plot result
         res_img = plot_results(boxes, scores, classes, frame, COCO_CATEGORY, pose_detections)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(res_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(res_img, fps)
             cv2.imshow('frame', res_img)
             frame_shown = True
         # save results

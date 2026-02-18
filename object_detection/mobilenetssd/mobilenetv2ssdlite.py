@@ -163,10 +163,10 @@ def recognize_from_video():
         # postprocessing
         mut.postprocessing(input_image, boxes, classes, scores)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(input_image, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(input_image, fps)
             cv2.imshow('frame', input_image)
 
         # save results

@@ -252,10 +252,10 @@ def recognize_from_video(interpreter):
 
         output_img = tiling(interpreter, frame)
 
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(output_img, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(output_img, fps)
             cv2.imshow('frame', output_img)
             frame_shown = True
         # save results

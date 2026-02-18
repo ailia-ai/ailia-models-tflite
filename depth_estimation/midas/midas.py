@@ -201,18 +201,12 @@ def recognize_from_video(interpreter):
     f_h = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
     f_w = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
 
-    zero_frame = np.zeros((f_h,f_w,3))
-    resized_img = midas_resize(zero_frame, h, w)
-    save_h, save_w = resized_img.shape[0], resized_img.shape[1]
-
-    output_frame = np.zeros((save_h,save_w*2,3))
-
     # create video writer if savepath is specified as video format
     if args.savepath != SAVE_IMAGE_PATH:
         logger.warning(
             'currently, video results cannot be output correctly...'
         )
-        writer = get_writer(args.savepath, save_h, save_w)
+        writer = get_writer(args.savepath, f_h, f_w)
     else:
         writer = None
 
@@ -227,7 +221,6 @@ def recognize_from_video(interpreter):
         if frame_shown and cv2.getWindowProperty('depth', cv2.WND_PROP_VISIBLE) == 0:
             break
         
-        frame_mini, scale, padding = resize_image(frame, (save_h, save_w), keep_aspect_ratio=False)
         frame_resize, scale, padding = resize_image(frame, (h, w), keep_aspect_ratio=False)
 
         # prepare input data
@@ -257,20 +250,12 @@ def recognize_from_video(interpreter):
         res_img = (out.transpose(1, 2, 0)/256).astype("uint8")
         res_img = cv2.cvtColor(res_img, cv2.COLOR_GRAY2BGR)
 
-        res_img, scale, padding = resize_image(res_img, (save_h, save_w), keep_aspect_ratio=False)
+        output_frame, scale, padding = resize_image(res_img, (frame.shape[0], frame.shape[1]), keep_aspect_ratio=False)
 
-        # grid view
-        #output_frame[:,save_w:save_w*2,:]=res_img
-        #output_frame[:,0:save_w,:]=frame_mini
-        #output_frame = output_frame.astype("uint8")
-
-        # single view
-        output_frame = res_img
-
+        fps, prev_time = calc_fps(prev_time)
+        if args.fps:
+            draw_fps(output_frame, fps)
         if not args.no_gui:
-            fps, prev_time = calc_fps(prev_time)
-            if args.fps:
-                draw_fps(output_frame, fps)
             cv2.imshow('depth', output_frame)
             frame_shown = True
 
